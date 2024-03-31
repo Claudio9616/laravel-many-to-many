@@ -7,6 +7,11 @@
         <div class="my-3">
             <label for="title" class="form-label">Aggiungi titolo</label>
             <input type="text" class="form-control @error('title') is-invalid @elseif (old('title', '')) is-valid @enderror" id="title" name="title" placeholder="Titolo progetto" value="{{old('title', '')}}">
+            @error('title')
+            <div class="invalid-feedback">
+                {{$message}}
+            </div>
+            @enderror
         </div>
         <div class="mb-3">
             <label for="language" class="form-label">Aggiungi linguaggio</label>
@@ -34,6 +39,16 @@
                     {{$message}}
                 </div>
             @enderror
+        </div>
+        {{-- per favorire la validazione il name dovrà essere composto da un array, per lo stesso motivo in questo caso il secondo parametro dell'old dovrà essere
+        un array vuoto--}}
+        <div class="mb-3">
+            @foreach ($technologies as $tech)
+            <div class="form-check form-check-inline">
+                <label class="form-check-label" for="{{"tech-$tech->id"}}">{{$tech->label}}</label>
+                <input class="form-check-input" type="checkbox" id="{{"tech-$tech->id"}}" value="{{$tech->id}}" name="tech[]" @if(in_array($tech->id, old('tech', []))) checked @endif>
+            </div>
+            @endforeach
         </div>
         <button type="reset">Svuoata campi</button>
         <button type="submit">Salva</button>

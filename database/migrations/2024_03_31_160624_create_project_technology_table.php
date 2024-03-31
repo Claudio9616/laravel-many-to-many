@@ -31,4 +31,5 @@ return new class extends Migration
         Schema::dropIfExists('project_technology');
     }
 };
-// Nella down in questo caso non dobbiamo mettere nulla perchè non stiamo creando nessuna relazione tra una tabella e l'altra come nel caso della tabella one-to-many
+// Nella down in questo caso non dobbiamo mettere nulla perchè stiamo creando una tabella semplice, nell'altra migration noi creiamo un legame e quindi se 
+// dovessimo ditruggere la tabella prima faccio il down della relazione e poi droppo la tabella stessa

@@ -9,6 +9,7 @@ use Illuminate\Validation\Rule;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Type;
+use App\Models\Technology;
 
 class ProjectController extends Controller
 {
@@ -27,7 +28,8 @@ class ProjectController extends Controller
     public function create()
     {
         $types = Type::all();
-        return view('admin.projects.create', compact('types'));
+        $technologies = Technology::all();
+        return view('admin.projects.create', compact('types', 'technologies'));
     }
 
     /**
@@ -41,13 +43,15 @@ class ProjectController extends Controller
             'language' => 'required|string',
             'image' => 'nullable|image',
             'type_id' => 'nullable|exists:types,id',
+            'tech' => 'nullable|exists:technologies,id'
         ], [
             'title.required' => 'Il titolo è obbligatorio',
             'title.unique' => 'Il titolo è già esistente',
             'description.required' => 'La descrizione è obligatoria',
             'language.required' => 'La lingua è obbligatoria',
             'image.image' => 'Il file inserito non è valido',
-            'type_id.exists' => 'La categoria non è valida'
+            'type_id.exists' => 'La categoria non è valida',
+            'tech.exists' => 'I tag selezionati non sono validi'
         ]);
         $data = $request->all();
         $project = new Project();
@@ -57,6 +61,10 @@ class ProjectController extends Controller
             $project->image = $img_url;
         }
         $project->save();
+        // dopo il salvataggio controllo se ci sono delle chiavi tech(che vengono dal checkbox) e li inserisco nella tabella ponte 
+        if(Arr::exists($data, 'tech')){
+            $project->technologies()->attach($data['tech']);
+        }
         return to_route('admin.projects.show', $project->id);
     }
 
@@ -73,8 +81,10 @@ class ProjectController extends Controller
      */
     public function edit(Project $project)
     {
+        $prev_tech = $project->technologies->pluck('id')->toArray();
         $types = Type::all();
-        return view('admin.projects.edit', compact('project', 'types'));
+        $technologies = Technology::all();
+        return view('admin.projects.edit', compact('project', 'types', 'technologies', 'prev_tech'));
     }
 
     /**
@@ -88,14 +98,16 @@ class ProjectController extends Controller
             'language' => 'required|string',
             'description' => 'required|string',
             'image' => 'nullable|image',
-            'type_id' => 'nullable|exists:types,id'
+            'type_id' => 'nullable|exists:types,id',
+            'tech' => 'nullable|exists:technologies,id'
         ], [
             'title.required' => 'Il titolo è obbligatorio',
             'title.unique' => 'Il titolo è già esistente',
             'description.required' => 'La descrizione è obligatoria',
             'language.required' => 'La lingua è obbligatoria',
             'image.image' => 'Il file inserito non è valido',
-            'type_id.exists' => 'La categoria non è valida'
+            'type_id.exists' => 'La categoria non è valida',
+            'tech.exists' => 'I tag selezionati non sono validi'
         ]);
         $data = $request->all();
         $project->fill($data);
@@ -105,6 +117,13 @@ class ProjectController extends Controller
             $project->image = $img_url;
         }
         $project->save();
+
+        if(Arr::exists($data, 'tech')){
+            $project->technologies()->sync($data['tech']);
+        } elseif(!Arr::exists($data, 'tech') && count($project->tech)){
+            $project->technologies()->detach();
+        }
+
         return to_route('admin.projects.show', $project->id);
     }
 

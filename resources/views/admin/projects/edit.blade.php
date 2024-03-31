@@ -29,6 +29,16 @@
             @endforeach
             {{-- dentro la option gli passi il label, ma per passare davvero il type id lo scrivi nel value e nell'if gli metti l'old per passare la selected --}}
         </select>
+         {{-- per favorire la validazione il name dovrà essere composto da un array, per lo stesso motivo in questo caso il secondo parametro dell'old dovrà essere
+        un array vuoto--}}
+        <div class="mb-3">
+            @foreach ($technologies as $tech)
+            <div class="form-check form-check-inline">
+                <label class="form-check-label" for="{{"tech-$tech->id"}}">{{$tech->label}}</label>
+                <input class="form-check-input" type="checkbox" id="{{"tech-$tech->id"}}" value="{{$tech->id}}" name="tech[]" @if(in_array($tech->id, old('tech', $prev_tech))) checked @endif>
+            </div>
+            @endforeach
+        </div>
         <div class="d-flex justify-content-between">
             <a href="{{route('admin.projects.index')}}" class="btn btn-secondary">INDIETRO</a>
             <div class="d-flex justify-content-between gap-3">

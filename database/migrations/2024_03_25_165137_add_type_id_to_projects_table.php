@@ -15,7 +15,7 @@ return new class extends Migration
             // definizione della colonna
             $table->unsignedBigInteger('type_id')->nullable()->after('id');
             // faccio l'effettiva relazione
-            $table->foreign('type_id')->references('id')->on('types')->nullOnDelete();
+            $table->foreign('type_id')->references('id')->on('types')->constrained()->nullOnDelete();
         });
     }
 
